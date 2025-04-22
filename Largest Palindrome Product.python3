@@ -1,0 +1,17 @@
+class Solution:
+    def largestPalindrome(self, n: int) -> int:
+        if n == 1:
+            return 9
+        
+        upper = 10 ** n - 1
+        lower = 10 ** (n - 1)
+        
+        for num in range(upper, lower - 1, -1):
+            candidate = int(str(num) + str(num)[::-1])  
+            for factor in range(upper, lower - 1, -1):
+                if candidate // factor > upper:  
+                    break
+                if candidate % factor == 0:
+                    return candidate % 1337
+        
+        return 0
