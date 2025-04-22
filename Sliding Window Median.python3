@@ -1,0 +1,32 @@
+class Solution:
+    def medianSlidingWindow(self, nums: List[int], k: int) -> List[float]:
+        n = len(nums)
+        # edge case: empty list or window size greater than list length
+        if n == 0 or k > n:
+            return []
+        
+        # helper function to get median of a subarray
+        def get_median(arr):
+            n = len(arr)
+            # if length is odd, return middle element
+            if n % 2 == 1:
+                return arr[n // 2]
+            # if length is even, return mean of middle elements
+            return (arr[n // 2] + arr[n // 2 - 1]) / 2
+        
+        # initialize deque to store current window
+        window = collections.deque()
+        # initialize result list to store medians
+        res = []
+        
+        # iterate over each element in nums
+        for i, x in enumerate(nums):
+            # add element to window
+            window.append(x)
+            # if window size is reached, get median and append to res
+            if len(window) == k:
+                res.append(get_median(sorted(window)))
+                # remove leftmost element from window
+                window.popleft()
+        
+        return res
