@@ -1,0 +1,13 @@
+class Solution:
+    def smallestGoodBase(self, n: str) -> str:
+        n = int(n)
+        max_m = int(math.log2(n))  # maximum length of 1's (i.e., number of digits)
+
+        for m in range(max_m, 1, -1):
+            k = int(n ** (1 / (m - 1)))  # estimate base
+            # check if 1 + k + k^2 + ... + k^(m-1) == n
+            total = (k ** m - 1) // (k - 1)
+            if total == n:
+                return str(k)
+        
+        return str(n - 1)  # fallback to base n-1 (i.e., 11 in base n-1)
