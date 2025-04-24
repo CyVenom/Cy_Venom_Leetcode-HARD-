@@ -1,45 +1,42 @@
 class Solution:
-    def findMinStep(self, board: str, hand: str) -> int:
-        hand_count = Counter(hand)
-        
-        def remove_consecutive(s):
-            i = 0
-            while i < len(s):
-                j = i
-                while j < len(s) and s[j] == s[i]:
-                    j += 1
-                if j - i >= 3:
-                    return remove_consecutive(s[:i] + s[j:])
-                i = j
-            return s
-        
-        memo = {}
+     def findMinStep(self, board, hand):
+        def reduce_three_plus(brd): # 3 or 3+ consecutive chars will be reduced to a single char
+            st = []
+            n = len(brd)
+            for i in range(n):
+                ch = brd[i]
+                st.append(ch)
+                if (i == n - 1 or ch != brd[i + 1]) and len(st) >= 3:
+                    a, b, c = st.pop(), st.pop(), st.pop()
+                    if a == b == c:
+                        while st and st[-1] == a:
+                            st.pop()
+                    else:
+                        st.append(c)
+                        st.append(b)
+                        st.append(a)
+            return ''.join(reversed(st))
 
-        def dfs(s, hand_count):
-            if s == "":
-                return 0
-            key = (s, tuple(sorted(hand_count.items())))
-            if key in memo:
-                return memo[key]
-            
-            res = float('inf')
-            i = 0
-            while i < len(s):
-                j = i
-                while j < len(s) and s[j] == s[i]:
-                    j += 1
-                need = 3 - (j - i)
-                if hand_count[s[i]] >= need:
-                    hand_count[s[i]] -= need
-                    new_board = remove_consecutive(s[:i] + s[j:])
-                    next_step = dfs(new_board, hand_count)
-                    if next_step != -1:
-                        res = min(res, next_step + need)
-                    hand_count[s[i]] += need
-                i = j
-            
-            memo[key] = -1 if res == float('inf') else res
-            return memo[key]
+        def dfs(brd, hd):
+            key = brd + "_" + hd
+            if key in d:
+                return d[key]
 
-        result = dfs(board, hand_count)
-        return result
+            brd = reduce_three_plus(brd)
+            ret, bsize, hsize = sys.maxsize, len(brd), len(hd)
+            if bsize == 0 or hsize == 0:
+                d[key] = 0 if bsize == 0 else sys.maxsize
+                return 0 if bsize == 0 else sys.maxsize
+
+            for i in range(hsize):
+                for j in range(bsize):
+                    if brd[j] == hd[i] or (j <= bsize - 2 and brd[j] == brd[j + 1]):
+                        # run dfs on new board and new hand
+                        ret = min(ret, 1 + dfs(brd[:j + 1] + hd[i] + brd[j + 1:], hd[:i] + hd[i + 1:]))
+
+            d[key] = ret
+            return ret
+        
+        d = {}
+        ans = dfs(board, hand)
+        return -1 if ans >= sys.maxsize else ans
