@@ -1,0 +1,45 @@
+class Solution:
+    def findMinStep(self, board: str, hand: str) -> int:
+        hand_count = Counter(hand)
+        
+        def remove_consecutive(s):
+            i = 0
+            while i < len(s):
+                j = i
+                while j < len(s) and s[j] == s[i]:
+                    j += 1
+                if j - i >= 3:
+                    return remove_consecutive(s[:i] + s[j:])
+                i = j
+            return s
+        
+        memo = {}
+
+        def dfs(s, hand_count):
+            if s == "":
+                return 0
+            key = (s, tuple(sorted(hand_count.items())))
+            if key in memo:
+                return memo[key]
+            
+            res = float('inf')
+            i = 0
+            while i < len(s):
+                j = i
+                while j < len(s) and s[j] == s[i]:
+                    j += 1
+                need = 3 - (j - i)
+                if hand_count[s[i]] >= need:
+                    hand_count[s[i]] -= need
+                    new_board = remove_consecutive(s[:i] + s[j:])
+                    next_step = dfs(new_board, hand_count)
+                    if next_step != -1:
+                        res = min(res, next_step + need)
+                    hand_count[s[i]] += need
+                i = j
+            
+            memo[key] = -1 if res == float('inf') else res
+            return memo[key]
+
+        result = dfs(board, hand_count)
+        return result
