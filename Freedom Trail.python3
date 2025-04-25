@@ -1,0 +1,22 @@
+class Solution:
+    def findRotateSteps(self, ring: str, key: str) -> int:
+        n = len(ring)
+        
+        # Map each character to all its indices in the ring
+        char_indices = defaultdict(list)
+        for i, ch in enumerate(ring):
+            char_indices[ch].append(i)
+        
+        @lru_cache(None)
+        def dfs(pos, k):
+            if k == len(key):
+                return 0
+            
+            res = float('inf')
+            target_char = key[k]
+            for idx in char_indices[target_char]:
+                dist = min(abs(pos - idx), n - abs(pos - idx))
+                res = min(res, dist + 1 + dfs(idx, k + 1))  # +1 for pressing the button
+            return res
+        
+        return dfs(0, 0)
