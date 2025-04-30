@@ -1,0 +1,22 @@
+class Solution:
+    def nearestPalindromic(self, n: str) -> str:
+        length = len(n)
+        num = int(n)
+        
+        # Edge candidates: 999..9 and 100..001
+        candidates = {str(10**length + 1), str(10**(length - 1) - 1)}
+        
+        # Get prefix and generate palindromes
+        prefix = int(n[:(length + 1)//2])
+        for i in [prefix - 1, prefix, prefix + 1]:
+            p = str(i)
+            if length % 2 == 0:
+                candidate = p + p[::-1]
+            else:
+                candidate = p + p[:-1][::-1]
+            candidates.add(candidate)
+        
+        candidates.discard(n)  # Exclude the original number
+        
+        # Find the closest based on absolute difference, break ties by choosing smaller
+        return min(candidates, key=lambda x: (abs(int(x) - num), int(x)))
