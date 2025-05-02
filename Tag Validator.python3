@@ -2,42 +2,28 @@ class Solution:
     def isValid(self, code: str) -> bool:
         stack = []
         i = 0
-        n = len(code)
-
-        def valid_tag(tag):
-            return 1 <= len(tag) <= 9 and tag.isupper()
-
-        while i < n:
-            if i > 0 and not stack:
-                return False  # everything must be wrapped inside a valid tag
-
-            if code.startswith("<![CDATA[", i):
+        while i < len(code):
+            if i > 0 and not stack:  # Внешний текст без обёртки в теги
+                return False
+            if code[i:i+9] == "<![CDATA[":  # CDATA
                 j = i + 9
-                k = code.find("]]>", j)
-                if k == -1:
+                i = code.find("]]>", j)
+                if i == -1:
                     return False
-                i = k + 3
-            elif code.startswith("</", i):
+                i += 3
+            elif code[i:i+2] == "</":  # Закрывающий тег
                 j = i + 2
-                k = code.find(">", j)
-                if k == -1:
+                i = code.find(">", j)
+                if i == -1 or not stack or stack.pop() != code[j:i] or '<' in code[j:i] or ' ' in code[j:i]:
                     return False
-                tag = code[j:k]
-                if not valid_tag(tag) or not stack or stack[-1] != tag:
-                    return False
-                stack.pop()
-                i = k + 1
-            elif code.startswith("<", i):
-                j = i + 1
-                k = code.find(">", j)
-                if k == -1:
-                    return False
-                tag = code[j:k]
-                if not valid_tag(tag):
-                    return False
-                stack.append(tag)
-                i = k + 1
-            else:
                 i += 1
-
+            elif code[i] == "<":  # Открывающий тег
+                j = i + 1
+                i = code.find(">", j)
+                if i == -1 or not (1 <= i - j <= 9) or not code[j:i].isupper() or '<' in code[j:i] or ' ' in code[j:i]:
+                    return False
+                stack.append(code[j:i])
+                i += 1
+            else:  # Внутреннее содержимое
+                i += 1
         return not stack
