@@ -1,0 +1,43 @@
+class Solution:
+    def isValid(self, code: str) -> bool:
+        stack = []
+        i = 0
+        n = len(code)
+
+        def valid_tag(tag):
+            return 1 <= len(tag) <= 9 and tag.isupper()
+
+        while i < n:
+            if i > 0 and not stack:
+                return False  # everything must be wrapped inside a valid tag
+
+            if code.startswith("<![CDATA[", i):
+                j = i + 9
+                k = code.find("]]>", j)
+                if k == -1:
+                    return False
+                i = k + 3
+            elif code.startswith("</", i):
+                j = i + 2
+                k = code.find(">", j)
+                if k == -1:
+                    return False
+                tag = code[j:k]
+                if not valid_tag(tag) or not stack or stack[-1] != tag:
+                    return False
+                stack.pop()
+                i = k + 1
+            elif code.startswith("<", i):
+                j = i + 1
+                k = code.find(">", j)
+                if k == -1:
+                    return False
+                tag = code[j:k]
+                if not valid_tag(tag):
+                    return False
+                stack.append(tag)
+                i = k + 1
+            else:
+                i += 1
+
+        return not stack
