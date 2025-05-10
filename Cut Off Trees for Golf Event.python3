@@ -1,0 +1,30 @@
+class Solution:
+    def cutOffTree(self, forest: list[list[int]]) -> int:
+        def bfs(start, goal):
+            queue = deque([(start[0], start[1], 0)])
+            visited = set([(start[0], start[1])])
+            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+            while queue:
+                x, y, steps = queue.popleft()
+                if (x, y) == goal:
+                    return steps
+                for dx, dy in directions:
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < m and 0 <= ny < n and (nx, ny) not in visited and forest[nx][ny] > 0:
+                        visited.add((nx, ny))
+                        queue.append((nx, ny, steps + 1))
+            return -1
+        
+        trees = sorted((h, r, c) for r, row in enumerate(forest) for c, h in enumerate(row) if h > 1)
+        m, n = len(forest), len(forest[0])
+        start = (0, 0)
+        total_steps = 0
+
+        for height, x, y in trees:
+            steps = bfs(start, (x, y))
+            if steps == -1:
+                return -1
+            total_steps += steps
+            start = (x, y)
+        
+        return total_steps
