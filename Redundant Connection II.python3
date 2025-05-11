@@ -1,0 +1,37 @@
+class Solution:
+    def findRedundantDirectedConnection(self, edges: list) -> list:
+        parent = {}
+        candidate1 = candidate2 = None
+
+        # Step 1: Check for a node with two parents
+        for u, v in edges:
+            if v in parent:
+                candidate1 = [parent[v], v]
+                candidate2 = [u, v]
+                edges.remove(candidate2)
+                break
+            parent[v] = u
+
+        def find(x):
+            if x != parent_map[x]:
+                parent_map[x] = find(parent_map[x])
+            return parent_map[x]
+
+        def union(x, y):
+            rootX = find(x)
+            rootY = find(y)
+            if rootX == rootY:
+                return False
+            parent_map[rootX] = rootY
+            return True
+
+        # Step 2: Union-Find to detect cycle
+        parent_map = list(range(len(edges) + 2))
+        for u, v in edges:
+            if not union(u, v):
+                if candidate1:
+                    return candidate1
+                return [u, v]
+        
+        # If no cycle found, return the second candidate
+        return candidate2
