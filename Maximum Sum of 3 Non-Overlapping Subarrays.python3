@@ -1,0 +1,38 @@
+class Solution:
+    def maxSumOfThreeSubarrays(self, nums: list, k: int) -> list:
+        if not nums or len(nums) < k * 3:
+            return []
+
+        numSub = len(nums) - k + 1
+
+        # Calculate subarray sums of length k
+        subSum = [0] * numSub
+        sum_val = sum(nums[:k])
+        subSum[0] = sum_val
+
+        for i in range(k, len(nums)):
+            sum_val = sum_val - nums[i - k] + nums[i]
+            subSum[i - k + 1] = sum_val
+
+        # Calculate max subarray indices from the left
+        maxAtLeft = [0] * numSub
+        for i in range(1, numSub):
+            maxAtLeft[i] = i if subSum[i] > subSum[maxAtLeft[i - 1]] else maxAtLeft[i - 1]
+
+        # Calculate max subarray indices from the right
+        maxAtRight = [0] * numSub
+        maxAtRight[-1] = numSub - 1
+        for i in range(numSub - 2, -1, -1):
+            maxAtRight[i] = i if subSum[i] >= subSum[maxAtRight[i + 1]] else maxAtRight[i + 1]
+
+        maxThree = [0, 0, 0]
+        maxSum = 0
+
+        # Find the optimal combination of three non-overlapping subarrays
+        for i in range(k, numSub - k):
+            curSum = subSum[maxAtLeft[i - k]] + subSum[i] + subSum[maxAtRight[i + k]]
+            if curSum > maxSum:
+                maxSum = curSum
+                maxThree = [maxAtLeft[i - k], i, maxAtRight[i + k]]
+
+        return maxThree
