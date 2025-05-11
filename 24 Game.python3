@@ -1,0 +1,25 @@
+from itertools import permutations
+from operator import add, sub, mul, truediv
+
+class Solution:
+    def judgePoint24(self, cards: list) -> bool:
+        def can_get_24(nums):
+            if len(nums) == 1:
+                return abs(nums[0] - 24) < 1e-6
+            for a, b, *rest in permutations(nums):
+                for op in (add, sub, mul, truediv):
+                    try:
+                        if op is truediv and b == 0:
+                            continue
+                        new_num = [op(a, b)] + rest
+                        if can_get_24(new_num):
+                            return True
+                        if op not in (add, mul):  # non-commutative operations
+                            new_num = [op(b, a)] + rest
+                            if can_get_24(new_num):
+                                return True
+                    except ZeroDivisionError:
+                        continue
+            return False
+        
+        return can_get_24(cards)
