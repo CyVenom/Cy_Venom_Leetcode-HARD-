@@ -1,0 +1,31 @@
+from functools import lru_cache
+from collections import Counter
+
+class Solution:
+    def minStickers(self, stickers: list[str], target: str) -> int:
+        sticker_counts = [Counter(sticker) for sticker in stickers]
+        
+        @lru_cache(None)
+        def dfs(remaining):
+            if not remaining:
+                return 0
+            
+            target_count = Counter(remaining)
+            min_stickers = float('inf')
+
+            for sticker in sticker_counts:
+                if sticker[remaining[0]] == 0:
+                    continue
+                
+                new_remaining = []
+                for char, count in target_count.items():
+                    if count > sticker[char]:
+                        new_remaining.append(char * (count - sticker[char]))
+
+                next_state = ''.join(new_remaining)
+                min_stickers = min(min_stickers, 1 + dfs(next_state))
+            
+            return min_stickers
+        
+        result = dfs(target)
+        return result if result != float('inf') else -1
