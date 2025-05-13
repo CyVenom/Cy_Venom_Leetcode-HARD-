@@ -1,0 +1,23 @@
+class Solution:
+    def fallingSquares(self, positions: list[list[int]]) -> list[int]:
+        intervals = []
+        heights = []
+
+        def find_height(left, side_length):
+            right = left + side_length
+            height = side_length
+            for l, r, h in intervals:
+                if l < right and left < r:  
+                    height = max(height, h + side_length)
+            intervals.append((left, right, height))
+            return height
+
+        max_height = 0
+        result = []
+
+        for left, side_length in positions:
+            height = find_height(left, side_length)
+            max_height = max(max_height, height)
+            heights.append(max_height)
+
+        return heights
