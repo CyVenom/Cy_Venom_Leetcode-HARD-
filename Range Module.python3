@@ -1,0 +1,40 @@
+from sortedcontainers import SortedDict
+
+class RangeModule:
+
+    def __init__(self):
+        self.ranges = SortedDict()
+
+    def addRange(self, left: int, right: int) -> None:
+        start = self.ranges.bisect_left(left)
+        if start > 0 and self.ranges.peekitem(start - 1)[1] >= left:
+            start -= 1
+
+        while start < len(self.ranges) and self.ranges.peekitem(start)[0] <= right:
+            left = min(left, self.ranges.peekitem(start)[0])
+            right = max(right, self.ranges.popitem(start)[1])
+
+        self.ranges[left] = right
+
+    def queryRange(self, left: int, right: int) -> bool:
+        start = self.ranges.bisect_right(left)
+        if start == 0:
+            return False
+        start -= 1
+        return self.ranges.peekitem(start)[0] <= left and self.ranges.peekitem(start)[1] >= right
+
+    def removeRange(self, left: int, right: int) -> None:
+        start = self.ranges.bisect_left(left)
+        if start > 0 and self.ranges.peekitem(start - 1)[1] > left:
+            start -= 1
+
+        add_back = []
+        while start < len(self.ranges) and self.ranges.peekitem(start)[0] < right:
+            l, r = self.ranges.popitem(start)
+            if l < left:
+                add_back.append((l, left))
+            if r > right:
+                add_back.append((right, r))
+
+        for l, r in add_back:
+            self.ranges[l] = r
