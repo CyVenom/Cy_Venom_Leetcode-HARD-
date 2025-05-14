@@ -1,0 +1,51 @@
+from collections import Counter
+
+class Solution:
+    def lengthAfterTransformations(self, s: str, t: int, nums: list[int]) -> int:
+        mod = 10**9 + 7
+
+        def doublePrevRound(matrix):
+            matrix.append([[0] * 26 for _ in range(26)])
+            for originalLetter in range(26):
+                output = matrix[-1][originalLetter]
+                for letter, count in enumerate(matrix[-2][originalLetter]):
+                    newLetters = matrix[-2][letter]
+                    for newLetter, multiple in enumerate(newLetters):
+                        output[newLetter] += count * multiple
+                        output[newLetter] %= mod
+
+        def applyTransform(string, transform):
+            newString = [0] * 26
+            for letter, count in enumerate(string):
+                newLetters = transform[letter]
+                for newLetter, multiple in enumerate(newLetters):
+                    newString[newLetter] += count * multiple
+                    newString[newLetter] %= mod
+            return newString
+
+        matrix = [[[0] * 26 for _ in range(26)]]
+        for letter, extraLetters in enumerate(nums):
+            for newLetter in range(letter + 1, letter + extraLetters + 1):
+                newLetter %= 26
+                matrix[0][letter][newLetter] = 1
+
+        power2 = 2
+        while power2 <= t:
+            doublePrevRound(matrix)
+            power2 *= 2
+        power2 //= 2
+
+        counter = Counter(s)
+        string = [0] * 26
+        for i in range(26):
+            string[i] = counter.get(chr(i + ord('a')), 0)
+
+        while t > 0:
+            if power2 <= t:
+                t -= power2
+                string = applyTransform(string, matrix.pop())
+            else:
+                matrix.pop()
+            power2 //= 2
+
+        return sum(string) % mod
