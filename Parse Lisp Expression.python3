@@ -1,0 +1,97 @@
+from collections import deque, defaultdict
+
+class Solution:
+    def sisdigit(self, s: str) -> bool:
+        if isinstance(s,int):
+            return True
+        elif not s:
+            return False
+        if s[0] == "-":
+            return s[1:].isdigit()
+        else:
+            return s.isdigit()
+    def tokenize(self, expr):
+        strBuffer=""
+        for c in expr:
+            if c in "()":
+                if c == ")" and strBuffer:
+                    yield strBuffer
+                    strBuffer = ""
+                yield c
+            elif c == " ":
+                yield strBuffer
+                strBuffer = ""
+            else:
+                strBuffer += c
+    def evaluate(self, expression: str) -> int:
+        tokens = self.tokenize(expression)
+        contextStack = []
+        exprstack = []
+        substack = []
+        for t in tokens:
+            if not t:
+                continue
+            elif t == "(":
+                continue
+            elif t in ["let", "add", "mult"]:
+                exprstack.append(t) # [let, mult, let]
+                if t == "let" and not contextStack:
+                    contextStack.append({})
+                elif t == "let":
+                    contextStack.append(dict(contextStack[-1]))
+                if t == "let":
+                    substack.append("let")
+            elif t == ")":
+                if exprstack[-1] == "add":
+                    right = substack.pop(-1)
+                    left = substack.pop(-1)
+                    res = (right+left)
+                    exprstack.pop(-1)
+                    if substack and exprstack and exprstack[-1] == "let" and not self.sisdigit(substack[-1]):
+                        contextStack[-1][substack[-1]] = res
+                        substack.pop(-1)
+                    substack.append(res)
+                elif exprstack[-1] == "mult":
+                    right = substack.pop(-1)
+                    left = substack.pop(-1)
+                    res = (right * left)
+                    exprstack.pop(-1)
+                    if substack and exprstack and exprstack[-1] == "let" and not self.sisdigit(substack[-1]):
+                        contextStack[-1][substack[-1]] = res
+                        substack.pop(-1)
+                    substack.append(res)
+                else:
+                    letout = substack[-1]
+                    while substack[-1] != "let":
+                        substack.pop(-1)
+                    substack.pop(-1)
+                    if not self.sisdigit(letout):
+                        letout = contextStack[-1][letout]
+                    exprstack.pop(-1)
+                    contextStack.pop(-1)
+                    if exprstack and exprstack[-1] == "let" and substack and not self.sisdigit(substack[-1]):
+                        contextStack[-1][substack[-1]] = letout
+                        substack.pop(-1)
+                    substack.append(letout)
+            elif exprstack and exprstack[-1] == "let":
+                if substack[-1]=="let":
+                    substack.append(t)
+                elif not self.sisdigit(substack[-1]):
+                    if not self.sisdigit(t):
+                        contextStack[-1][substack[-1]] = contextStack[-1][t]
+                    else:
+                        contextStack[-1][substack[-1]] = int(t)
+                    var = substack.pop()
+                    substack.append(contextStack[-1][var])
+                elif self.sisdigit(t):
+                    substack.append(int(t))
+                else:
+                    substack.append(t)
+            elif not self.sisdigit(t):
+                substack.append(contextStack[-1][t])
+            else:
+                substack.append(int(t))
+
+        return substack[-1]
+
+        
