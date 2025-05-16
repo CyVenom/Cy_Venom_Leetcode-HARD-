@@ -1,0 +1,77 @@
+from collections import deque
+
+class Solution:
+    def containVirus(self, isInfected: list[list[int]]) -> int:
+        m, n = len(isInfected), len(isInfected[0])
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+        def neighbors(x, y):
+            for dx, dy in directions:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < m and 0 <= ny < n:
+                    yield nx, ny
+
+        def find_regions():
+            seen = [[False] * n for _ in range(m)]
+            regions = []
+
+            for i in range(m):
+                for j in range(n):
+                    if isInfected[i][j] == 1 and not seen[i][j]:
+                        queue = deque([(i, j)])
+                        region = []
+                        seen[i][j] = True
+                        while queue:
+                            x, y = queue.popleft()
+                            region.append((x, y))
+                            for nx, ny in neighbors(x, y):
+                                if isInfected[nx][ny] == 1 and not seen[nx][ny]:
+                                    seen[nx][ny] = True
+                                    queue.append((nx, ny))
+                        regions.append(region)
+            return regions
+
+        def calculate_threat(region):
+            threat = set()
+            walls_needed = 0
+            for x, y in region:
+                for nx, ny in neighbors(x, y):
+                    if isInfected[nx][ny] == 0:
+                        threat.add((nx, ny))
+                        walls_needed += 1
+            return threat, walls_needed
+
+        total_walls = 0
+        while True:
+            regions = find_regions()
+            if not regions:
+                break
+
+            max_threat = 0
+            max_region = -1
+            threats = []
+            walls = []
+
+            for idx, region in enumerate(regions):
+                threat, wall_count = calculate_threat(region)
+                threats.append(threat)
+                walls.append(wall_count)
+                if len(threat) > max_threat:
+                    max_threat = len(threat)
+                    max_region = idx
+
+            if max_region == -1:
+                break
+
+            total_walls += walls[max_region]
+
+            for x, y in regions[max_region]:
+                isInfected[x][y] = -1
+
+            for i, region in enumerate(regions):
+                if i == max_region:
+                    continue
+                for x, y in threats[i]:
+                    isInfected[x][y] = 1
+
+        return total_walls
