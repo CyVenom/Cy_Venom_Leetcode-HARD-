@@ -1,0 +1,18 @@
+class WordFilter:
+
+    def __init__(self, words: list[str]):
+        self.word_map = {}
+        for index, word in enumerate(words):
+            length = len(word)
+            for i in range(length + 1):
+                for j in range(length + 1):
+                    key = word[:i] + '#' + word[-j:]
+                    self.word_map[key] = index
+
+    def f(self, pref: str, suff: str) -> int:
+        key = pref + '#' + suff
+        return self.word_map.get(key, -1)
+
+# Example usage:
+# obj = WordFilter(["apple"])
+# print(obj.f("a", "e"))  # Output: 0
