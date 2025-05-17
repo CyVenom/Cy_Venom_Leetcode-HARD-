@@ -1,0 +1,23 @@
+class Solution:
+    def minSwapsCouples(self, row: list) -> int:
+        n = len(row)
+        position = {x: i for i, x in enumerate(row)}
+        swaps = 0
+
+        for i in range(0, n, 2):
+            first = row[i]
+            second = first ^ 1  # The expected partner
+
+            if row[i + 1] != second:
+                swaps += 1
+                # Find the current position of the expected partner
+                partner_pos = position[second]
+
+                # Swap the misplaced partner with the expected one
+                row[i + 1], row[partner_pos] = row[partner_pos], row[i + 1]
+
+                # Update the positions in the dictionary
+                position[row[partner_pos]] = partner_pos
+                position[row[i + 1]] = i + 1
+
+        return swaps
