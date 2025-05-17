@@ -1,0 +1,12 @@
+class Solution:
+    def maxChunksToSorted(self, arr: list) -> int:
+        sorted_arr = sorted(arr)
+        sum1 = sum2 = chunks = 0
+        
+        for a, b in zip(arr, sorted_arr):
+            sum1 += a
+            sum2 += b
+            if sum1 == sum2:
+                chunks += 1
+                
+        return chunks
