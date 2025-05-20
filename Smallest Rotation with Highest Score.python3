@@ -1,0 +1,29 @@
+# O(n) time | O(n) space
+class Solution:
+    def bestRotation(self, nums: List[int]) -> int:
+        n = len(nums)
+        diff = [0] * n
+
+        for i, v in enumerate(nums):
+            # If we rotate by k, nums[i] moves to (i - k + n) % n
+            # We want nums[i] <= (i - k + n) % n
+            # Which becomes: k in [i - v + 1, i] (mod n)
+            low = (i + 1) % n
+            high = (i - v + n + 1) % n
+
+            diff[low] += 1
+            diff[high] -= 1
+            if low >= high:
+                diff[0] += 1
+
+        max_score = 0
+        score = 0
+        best_k = 0
+
+        for i in range(n):
+            score += diff[i]
+            if score > max_score:
+                max_score = score
+                best_k = i
+
+        return best_k
