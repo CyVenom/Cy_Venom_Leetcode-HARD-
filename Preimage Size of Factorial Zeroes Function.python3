@@ -1,0 +1,30 @@
+class Solution:
+    def preimageSizeFZF(self, k: int) -> int:
+        def trailing_zeroes(n):
+            count = 0
+            while n > 0:
+                n //= 5
+                count += n
+            return count
+
+        def left_bound(k):
+            low, high = 0, 5 * (k + 1)
+            while low < high:
+                mid = (low + high) // 2
+                if trailing_zeroes(mid) < k:
+                    low = mid + 1
+                else:
+                    high = mid
+            return low
+
+        def right_bound(k):
+            low, high = 0, 5 * (k + 1)
+            while low < high:
+                mid = (low + high) // 2
+                if trailing_zeroes(mid) <= k:
+                    low = mid + 1
+                else:
+                    high = mid
+            return low
+
+        return right_bound(k) - left_bound(k)
